@@ -12,10 +12,10 @@ server {
     
     server_name __domain.tld__;
 
-    access_log /home/__username__/www/__domain.tld__/logs/access.log;
-    error_log /home/__username__/www/__domain.tld__/logs/error.log;
+    access_log /var/www/app/logs/access.log;
+    error_log /var/www/app/logs/error.log;
 
-    root /home/__username__/www/__domain.tld__/public/;
+    root /var/www/app/current/public/;
     index index.html index.php;
 
     location = /favicon.ico {
