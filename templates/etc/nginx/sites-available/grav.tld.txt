@@ -16,37 +16,27 @@ server {
     error_log /var/www/app/logs/error.log;
 
     root /var/www/app/current;
-    index index.html index.php;
-
-    location = /favicon.ico {
-        log_not_found off;
-        access_log off;
-    }
-
-    location = /robots.txt {
-        allow all;
-        log_not_found off;
-        access_log off;
-    }
-
-    # Deny all attempts to access hidden files such as .htaccess, .htpasswd, .DS_Store (Mac).
-    # Keep logging the requests to parse later (or to pass to firewall utilities such as fail2ban)
-    location ~ /\.ht {
-        deny all;
-    }
-
-    # Deny access to any files with a .php extension in the uploads directory
-    # Works in sub-directory installs and also in multisite network
-    # Keep logging the requests to parse later (or to pass to firewall utilities such as fail2ban)
-    location ~* /(?:uploads|files)/.*\.php$ {
-        deny all;
-    }
     
+    ## Begin - Index
+    # for subfolders, simply adjust:
+    # `location /subfolder {`
+    # and the rewrite to use `/subfolder/index.php`
     location / {
-        # This is cool because no php is touched for static content.
-        # include the "$is_args$args" part so non-default permalinks doesn't break when using query string
-        try_files $uri $uri/ /index.php$is_args$args;
+        try_files $uri $uri/ /index.php?$query_string;
     }
+    ## End - Index
+
+    ## Begin - Security
+    # deny all direct access for these folders
+    location ~* /(\.git|cache|bin|logs|backup|tests)/.*$ { return 403; }
+    # deny running scripts inside core system folders
+    location ~* /(system|vendor)/.*\.(txt|xml|md|html|yaml|yml|php|pl|py|cgi|twig|sh|bat)$ { return 403; }
+    # deny running scripts inside user folder
+    location ~* /user/.*\.(txt|md|yaml|yml|php|pl|py|cgi|twig|sh|bat)$ { return 403; }
+    # deny access to specific files in the root folder
+    location ~ /(LICENSE\.txt|composer\.lock|composer\.json|nginx\.conf|web\.config|htaccess\.txt|\.htaccess) { return 403; }
+    ## End - Security
+    
 
     # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
     location ~ \.php$ {
@@ -59,8 +49,4 @@ server {
         fastcgi_param     SCRIPT_FILENAME   $document_root$fastcgi_script_name;
     }
 
-    location ~* \.(js|css|png|jpg|jpeg|gif|ico)$ {
-        expires max;
-        log_not_found off;
-    }
 }
