@@ -16,6 +16,7 @@ server {
     error_log /var/www/app/logs/error.log;
 
     root /var/www/app/current;
+    index index.html index.php;
     
     ## Begin - Index
     # for subfolders, simply adjust:
